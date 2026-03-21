@@ -135,7 +135,7 @@ function UserAuthModal({ usedForSignup = false }) {
                                         <Input
                                             {...field}
                                             id="signup-signin-lastname-field"
-                                            placeholder="User"
+                                            placeholder="Person"
                                             autoComplete="family-name"
                                         />
                                     </Field>
@@ -173,7 +173,6 @@ function UserAuthModal({ usedForSignup = false }) {
 }
 
 export default function SidebarUserAuth() {
-
     return (
         <>
             <h2>Chats will appear once you are logged in. We hope you enjoy your stay.</h2>

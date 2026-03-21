@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model friendRequests {
+  friendRequestId                             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  initiatorUserId                             BigInt                @db.UnsignedBigInt
+  targetUserId                                BigInt                @db.UnsignedBigInt
+  status                                      friendRequests_status @default(pending)
+  users_friendRequests_targetUserIdTousers    users                 @relation("friendRequests_targetUserIdTousers", fields: [targetUserId], references: [userId], onUpdate: Restrict, map: "Friend_Requests_users_user_id_fk")
+  users_friendRequests_initiatorUserIdTousers users                 @relation("friendRequests_initiatorUserIdTousers", fields: [initiatorUserId], references: [userId], onUpdate: Restrict, map: "Friend_Requests_users_user_id_fk_2")
+
+  @@unique([initiatorUserId, targetUserId], map: "Friend_Requests_pk_2")
+  @@index([targetUserId], map: "Friend_Requests_users_user_id_fk")
+}
+
+model users {
+  userId                                               BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  firstName                                            String           @db.VarChar(255)
+  lastName                                             String           @db.VarChar(255)
+  username                                             String           @unique(map: "username") @db.VarChar(255)
+  password                                             String           @db.Char(97)
+  accessToken                                          String?          @db.Char(128)
+  email                                                String           @db.VarChar(255)
+  isBanned                                             Boolean          @default(false)
+  friendRequests_friendRequests_targetUserIdTousers    friendRequests[] @relation("friendRequests_targetUserIdTousers")
+  friendRequests_friendRequests_initiatorUserIdTousers friendRequests[] @relation("friendRequests_initiatorUserIdTousers")
+}
+
+enum friendRequests_status {
+  pending
+  accepted
+}
