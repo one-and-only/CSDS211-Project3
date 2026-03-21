@@ -5,14 +5,16 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar"
+import SidebarUserAuth from "./sidebar-user-auth"
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar collapsible="offcanvas" variant="floating">
       <SidebarHeader />
       <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroup />
+        <SidebarGroup>
+          <SidebarUserAuth />
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
