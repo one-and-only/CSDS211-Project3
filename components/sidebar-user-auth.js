@@ -63,6 +63,7 @@ function UserAuthModal({ usedForSignup = false }) {
 
             document.cookie = `accessToken=${accessTokenResponse.accessToken}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
 
+            window.location.reload();
             return;
         }
 
@@ -74,6 +75,7 @@ function UserAuthModal({ usedForSignup = false }) {
             }
 
             document.cookie = `accessToken=${accessTokenResponse.accessToken}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
+            window.location.reload();
         } catch (e) {
             alert("Network request failed. Please check your network connection, refresh the page, and try again.");
             return;
