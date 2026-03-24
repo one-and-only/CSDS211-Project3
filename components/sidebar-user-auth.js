@@ -228,12 +228,16 @@ function UserAuthModal({ usedForSignup = false }) {
                     </DialogHeader>
                 </DialogContent>
             </Dialog>
-                : (<h2>{usedForSignup ? "" : (loadingChats ? "Loading your messages..." :
-                    chats.map(chat => {
+                : (<h2>{usedForSignup ? "" : (loadingChats ? "Loading your messages..." : <div><h2 style={{fontWeight: "bold"}}>Your Chats</h2><ButtonGroup
+                    orientation="vertical"
+                    aria-label="Media controls"
+                    className="h-fit"
+                    key="CurrentChatsButtonGroup"
+                >
+                    {chats.map(chat => {
                         const displayValue = chat.username[0].toUpperCase() + (chat.username[chat.username.length / 2] ?? "").toUpperCase();
-                        console.log(displayValue);
-                        return <Avvvatars value={chat.username} borderColor="red" displayValue={displayValue} key={displayValue} />
-                    }))}</h2>)
+                        return <Button key={`${displayValue}BtnContainer`} style={{marginTop: "10px", marginBottom: "10px"}}><Avvvatars value={chat.username} borderColor="red" displayValue={displayValue} key={displayValue} /></Button>
+                    })}</ButtonGroup></div>)}</h2>)
             }
         </>
     );
