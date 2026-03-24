@@ -59,14 +59,17 @@ export async function GET(request, context) {
         }
     });
 
-    return NextResponse.json(chats.map(chat => {
-        const targetUserObject = chat.users_chats_initiatorUserIdTousers.userId === user.userId ? chat.users_chats_targetUserIdTousers : chat.users_chats_initiatorUserIdTousers;
-        
-        return {
-            chatId: Number(chat.chatId),
-            firstName: targetUserObject.firstName,
-            lastName: targetUserObject.lastName,
-            username: targetUserObject.username,
-        };
-    }));
+    return NextResponse.json({
+        success: true,
+        chats: chats.map(chat => {
+            const targetUserObject = chat.users_chats_initiatorUserIdTousers.userId === user.userId ? chat.users_chats_targetUserIdTousers : chat.users_chats_initiatorUserIdTousers;
+
+            return {
+                chatId: Number(chat.chatId),
+                firstName: targetUserObject.firstName,
+                lastName: targetUserObject.lastName,
+                username: targetUserObject.username,
+            };
+        })
+    });
 }

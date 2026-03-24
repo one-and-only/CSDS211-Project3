@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
     Dialog,
     DialogContent,
@@ -18,9 +17,26 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import Avvvatars from "avvvatars-react"
+import useSWR from "swr";
+import { ButtonGroup } from "@/components/ui/button-group"
 
 function UserAuthModal({ usedForSignup = false }) {
     const [accessToken, setAccessToken] = useState(null);
+
+    const chatsFetcher = async () => {
+        const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+        if (accessToken === undefined)
+            throw "Unable to get access token. Are you logged in?";
+
+        const chats = await (await fetch(`/api/v1/users/chats?accessToken=${encodeURIComponent(accessToken)}`)).json();
+        if (!chats.success) {
+            throw "Failed fetching chats. Refresh the page and try again."
+        }
+
+        return chats.chats;
+    }
+    const { data: chats, error: chatLoadError, isLoading: loadingChats } = useSWR('/api/user', chatsFetcher)
 
     const form = useForm({
         defaultValues: {
@@ -61,8 +77,6 @@ function UserAuthModal({ usedForSignup = false }) {
                 return;
             }
 
-            document.cookie = `accessToken=${accessTokenResponse.accessToken}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
-
             window.location.reload();
             return;
         }
@@ -74,7 +88,8 @@ function UserAuthModal({ usedForSignup = false }) {
                 return;
             }
 
-            document.cookie = `accessToken=${accessTokenResponse.accessToken}; path=/; max-age=2592000; SameSite=Lax`; // 30 days
+            await window.cookieStore.set("accessToken", accessTokenResponse.accessToken);
+            setAccessToken(accessTokenResponse.accessToken);
             window.location.reload();
         } catch (e) {
             alert("Network request failed. Please check your network connection, refresh the page, and try again.");
@@ -83,10 +98,13 @@ function UserAuthModal({ usedForSignup = false }) {
     };
 
     useEffect(() => {
-        if (!document.cookie.includes("accessToken")) return;
+        async function init() {
+            const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+            setAccessToken(accessToken ?? null);
+        }
 
-        setAccessToken(decodeURIComponent(document.cookie).split(";").map(x => x.trim()).filter(x => x.indexOf("accessToken") === 0)[0].substring(12));
-    }, []);
+        init();
+    }, [accessToken]);
 
     return (
         <>
@@ -210,7 +228,12 @@ function UserAuthModal({ usedForSignup = false }) {
                     </DialogHeader>
                 </DialogContent>
             </Dialog>
-                : (<h2>{usedForSignup ? "" : "You are now logged in! Functionality will be added soon..."}</h2>)
+                : (<h2>{usedForSignup ? "" : (loadingChats ? "Loading your messages..." :
+                    chats.map(chat => {
+                        const displayValue = chat.username[0].toUpperCase() + (chat.username[chat.username.length / 2] ?? "").toUpperCase();
+                        console.log(displayValue);
+                        return <Avvvatars value={chat.username} borderColor="red" displayValue={displayValue} key={displayValue} />
+                    }))}</h2>)
             }
         </>
     );
