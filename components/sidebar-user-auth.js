@@ -20,9 +20,11 @@ import { Input } from "@/components/ui/input"
 import Avvvatars from "avvvatars-react"
 import useSWR from "swr";
 import { ButtonGroup } from "@/components/ui/button-group"
+import { useRouter } from "next/navigation";
 
 function UserAuthModal({ usedForSignup = false }) {
     const [accessToken, setAccessToken] = useState(null);
+    const router = useRouter();
 
     const chatsFetcher = async () => {
         const accessToken = (await window.cookieStore.get("accessToken"))?.value;
@@ -104,7 +106,7 @@ function UserAuthModal({ usedForSignup = false }) {
         }
 
         init();
-    }, [accessToken]);
+    }, []);
 
     return (
         <>
@@ -236,7 +238,7 @@ function UserAuthModal({ usedForSignup = false }) {
                 >
                     {chats.map(chat => {
                         const displayValue = chat.username[0].toUpperCase() + (chat.username[chat.username.length / 2] ?? "").toUpperCase();
-                        return <Button key={`${displayValue}BtnContainer`} style={{marginTop: "10px", marginBottom: "10px"}}><Avvvatars value={chat.username} borderColor="red" displayValue={displayValue} key={displayValue} /></Button>
+                        return <button key={`${displayValue}BtnContainer`} onClick={() => router.push(`/dm/${chat.chatId}`)}><Avvvatars size={96} value={chat.username} displayValue={displayValue} key={displayValue} /></button>
                     })}</ButtonGroup></div>)}</h2>)
             }
         </>

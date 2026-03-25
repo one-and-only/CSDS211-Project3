@@ -4,7 +4,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-const notoSans = Noto_Sans({ variable: '--font-sans' });
+const notoSans = Noto_Sans({ variable: '--font-sans', subsets: ["latin"] });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "components/sidebar-user-auth.js"  ],
+, "components/sidebar-user-auth.js", "app/dm/[dmId]/layout.jsx", "app/dm/[dmId]/page.jsx", "app/page.jsx", "components/app-sidebar.jsx"  ],
   "exclude": ["node_modules"]
 }

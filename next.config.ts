@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  poweredByHeader: false,
+  experimental: {
+    preloadEntriesOnStart: true,
+    cssChunking: true,
+    optimizeCss: true,
+    serverMinification: true
+  }
 };
 
 export default nextConfig;
