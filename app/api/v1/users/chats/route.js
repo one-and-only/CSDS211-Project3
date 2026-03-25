@@ -5,7 +5,7 @@ export async function GET(request, context) {
     const searchParams = await request.nextUrl.searchParams;
     const accessToken = searchParams.get("accessToken");
     if (accessToken === null) {
-        return NextResponse({
+        return NextResponse.json({
             success: false,
             error: "Failed to provide a valid access token"
         }, { status: 401 });
@@ -21,7 +21,7 @@ export async function GET(request, context) {
     });
 
     if (user === null) {
-        return NextResponse({
+        return NextResponse.json({
             success: false,
             error: "Failed to provide a valid access token"
         }, { status: 401 });
