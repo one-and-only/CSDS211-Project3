@@ -61,7 +61,9 @@ export async function GET(request, { params }) {
         },
         select: {
             message: true,
-            messageId: true
+            messageId: true,
+            createdAt: true,
+            userId: true
         },
         orderBy: {
             messageId: "asc"
@@ -74,6 +76,11 @@ export async function GET(request, { params }) {
     console.log(messages);
     return NextResponse.json({
         success: true,
-        messages: messages.map(x => ({message: x.message, messageId: Number(x.messageId)}))
+        messages: messages.map(x => ({
+            messageId: Number(x.messageId),
+            message: x.message,
+            createdAt: x.createdAt,
+            userId: Number(x.userId)
+        }))
     });
 }
