@@ -107,7 +107,7 @@ export default function MessagesListClientComponent({ dmId }) {
                     >
                         {messages.map((message, index) =>
                             <Message
-                                type={message.username === username ? "outgoing" : "incoming"}
+                                type={message.userId === currentUserIdRef.current ? "outgoing" : "incoming"}
                                 created_at={message.createdAt}
                                 seen
                                 text={message.message}
