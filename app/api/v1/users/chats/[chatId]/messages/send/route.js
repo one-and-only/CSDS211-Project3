@@ -6,6 +6,13 @@ export async function POST(request, { params }) {
     const body = await request.json();
     const text = body.message;
 
+    if (!text) {
+        return NextResponse.json({
+            success: false,
+            error: "Failed to provide message"
+        }, { status: 400 })
+    }
+
     if (!chatId) {
         return NextResponse.json({
             success: false,
@@ -49,7 +56,7 @@ export async function POST(request, { params }) {
         }, { status: 401 });
     }
 
-    await prisma.messages.create({
+    const message = await prisma.messages.create({
         data: {
             chatId,
             message: text,
@@ -58,6 +65,9 @@ export async function POST(request, { params }) {
     });
 
     return NextResponse.json({
-        success: true
+        success: true,
+        messageId: Number(message.messageId),
+        createdAt: message.createdAt,
+        userId: Number(message.userId)
     });
 }
