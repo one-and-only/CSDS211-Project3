@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
     cssChunking: true,
     optimizeCss: true,
     serverMinification: true
+  },
+  compiler: {
+    removeConsole: {
+      exclude: ['error', 'warn', 'info'],
+    },
   }
 };
 
