@@ -45,13 +45,20 @@ export default function MessagesListClientComponent({ dmId }) {
         init();
     }, [dmId, router]);
 
-    const sendMessage = (input) => {
+    const sendMessage = async input => {
+        const message = await (await fetch(`/api/v1/users/chats/${dmId}/messages/send?accessToken=${encodeURIComponent(accessTokenRef.current)}`, {
+            method: "POST",
+            body: JSON.stringify({
+                message: input
+            })
+        })).json();
+
         setMessages(messages => {
             return [{
-                messageId: Number.MAX_SAFE_INTEGER,
+                messageId: message.messageId,
                 message: input,
-                createdAt: new Date(),
-                userId: currentUserIdRef.current
+                createdAt: new Date(message.createdAt),
+                userId: message.userId
             }, ...messages];
         });
     }
@@ -77,14 +84,12 @@ export default function MessagesListClientComponent({ dmId }) {
     }
 
     return (
-        // 1. The main layout wrapper is now standard HTML, completely free of the library
         <div className="flex flex-col h-screen w-full bg-white relative overflow-hidden">
 
             <div className="h-16 border-b flex items-center px-6 bg-white shrink-0 z-10 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-800">Chat with {username}</h2>
+                <h2 className="text-lg font-semibold text-gray-800">Chatting With {chattingWithUsernameRef.current}</h2>
             </div>
 
-            {/* 2. The Provider ONLY wraps the messages list to give them the chatTheme colors */}
             <MinChatUiProvider colorSet={chatTheme}>
                 <div
                     id="scrollable-chat-container"
@@ -108,7 +113,6 @@ export default function MessagesListClientComponent({ dmId }) {
                                 text={message.message}
                                 user={message.userId}
                                 showAvatar={true}
-                                // Temporary fix for the duplicate key spam until you add deduplication logic
                                 key={`msg-${message.messageId}-${index}`}
                             />
                         )}
@@ -116,18 +120,16 @@ export default function MessagesListClientComponent({ dmId }) {
                 </div>
             </MinChatUiProvider>
 
-            {/* 3. The Input is now OUTSIDE the Provider. It cannot be hijacked. */}
             <div className="flex items-center gap-2 border-t p-2 md:p-3 bg-white shrink-0 relative z-20">
                 <Input
                     type="text"
                     placeholder="Type message here..."
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    onKeyDown={(e) => {
+                    onKeyDown={async (e) => {
                         if (e.key === 'Enter' && inputText.trim()) {
                             e.preventDefault();
-                            window.alert(`ENTER KEY FIRED: ${inputText.trim()}`); // Unblockable test
-                            sendMessage(inputText.trim());
+                            await sendMessage(inputText.trim());
                             setInputText("");
                         }
                     }}
@@ -135,11 +137,10 @@ export default function MessagesListClientComponent({ dmId }) {
                 />
                 <Button
                     type="button"
-                    onClick={(e) => {
+                    onClick={async (e) => {
                         e.preventDefault();
                         if (inputText.trim()) {
-                            window.alert(`BUTTON CLICKED: ${inputText.trim()}`); // Unblockable test
-                            sendMessage(inputText.trim());
+                            await sendMessage(inputText.trim());
                             setInputText("");
                         }
                     }}
