@@ -14,30 +14,31 @@ import { LucideSend } from "lucide-react";
 export default function MessagesListClientComponent({ dmId }) {
     const [messages, setMessages] = useState([]);
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
-    const [accessToken, setAccessToken] = useState("");
-    const [username, setUsername] = useState("");
     const [inputText, setInputText] = useState("");
 
     const accessTokenRef = useRef("");
     const lastMessageIdRef = useRef(-1);
     const currentUserIdRef = useRef(-1);
+    const chattingWithUsernameRef = useRef("");
 
     const router = useRouter();
 
     useEffect(() => {
         async function init() {
             const token = (await window.cookieStore.get("accessToken"))?.value;
-            if (accessToken === undefined) {
+            if (token === undefined) {
                 router.replace("/");
                 return;
             }
 
-            setAccessToken(token);
             accessTokenRef.current = token;
 
             const profile = await (await fetch(`/api/v1/users/profile?accessToken=${encodeURIComponent(accessTokenRef.current)}`)).json();
             currentUserIdRef.current = profile.userId;
-            setUsername(profile.username);
+
+            const chatsResponse = await (await fetch(`/api/v1/users/chats?accessToken=${encodeURIComponent(accessTokenRef.current)}`)).json();
+            const chatInfo = chatsResponse.chats.filter(x => x.chatId === parseInt(dmId))[0];
+            chattingWithUsernameRef.current = chatInfo.username;
             await fetchMoreMessages();
         }
 
