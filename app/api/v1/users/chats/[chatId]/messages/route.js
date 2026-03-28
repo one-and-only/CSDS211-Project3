@@ -73,7 +73,6 @@ export async function GET(request, { params }) {
         skip: lastMessageId !== -1 ? 1 : undefined
     });
 
-    console.log(messages);
     return NextResponse.json({
         success: true,
         messages: messages.map(x => ({
