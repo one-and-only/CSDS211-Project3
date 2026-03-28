@@ -1,33 +1,9 @@
-"use client";
+import ClientComponentOuter from "./clientComponentOuter";
 
-import {
-    MessageInput,
-    MessageList,
-    MessageHeader,
-    MinChatUiProvider,
-    MainContainer,
-    MessageContainer,
-} from "@minchat/react-chat-ui";
+export default async function Page({ params }) {
+    const { dmId } = await params;
 
-export default function Page() {
     return (
-        <MinChatUiProvider theme="#6ea9d7">
-            <MainContainer style={{ height: '100vh' }}>
-                <MessageContainer>
-                    <MessageHeader />
-                    <MessageList
-                        currentUserId='dan'
-                        messages={[{
-                            text: 'Hello',
-                            user: {
-                                id: 'mark',
-                                name: 'Markus',
-                            },
-                        }]}
-                    />
-                    <MessageInput placeholder="Type message here" />
-                </MessageContainer>
-            </MainContainer>
-        </MinChatUiProvider>
-    );
+        <ClientComponentOuter dmId={dmId} />
+    )
 }
