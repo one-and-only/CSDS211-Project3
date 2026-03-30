@@ -37,13 +37,16 @@ export async function PUT(request, context) {
     }
 
     try {
-        await prisma.friendRequests.deleteMany({
+        await prisma.friendRequests.updateMany({
             where: {
                 targetUserId: user.userId,
                 status: "pending",
                 users_friendRequests_initiatorUserIdTousers: {
                     username: initiatorUserName
                 }
+            },
+            data: {
+                status: "accepted"
             }
         });
 
@@ -54,5 +57,5 @@ export async function PUT(request, context) {
         return NextResponse.json({
             success: true
         });
-    } // delete throws when not finding a record, but this is fine when no friend request exists
+    } // update throws when not finding a record, but this is fine when no friend request exists
 }
