@@ -26,7 +26,7 @@ model users {
   username                                             String           @unique(map: "username") @db.VarChar(255)
   password                                             String           @db.Char(97)
   accessToken                                          String?          @db.Char(128)
-  email                                                String           @db.VarChar(255)
+  email                                                String           @unique(map: "email") @db.VarChar(255)
   isBanned                                             Boolean          @default(false)
   chats_chats_initiatorUserIdTousers                   chats[]          @relation("chats_initiatorUserIdTousers")
   chats_chats_targetUserIdTousers                      chats[]          @relation("chats_targetUserIdTousers")
