@@ -13,6 +13,13 @@ export async function PUT(request, context) {
         }, { status: 401 });
     }
 
+    if (initiatorUserName === null) {
+        return NextResponse.json({
+            success: false,
+            error: "Failed to provide valid username"
+        });
+    }
+
     const user = await prisma.users.findFirst({
         where: {
             accessToken
