@@ -9,7 +9,7 @@ import SidebarUserAuth from "./sidebar-user-auth"
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="offcanvas" variant="floating">
+    <Sidebar collapsible="icon" variant="floating">
       <SidebarHeader />
       <SidebarContent>
         <SidebarGroup>

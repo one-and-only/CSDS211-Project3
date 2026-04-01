@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -9,6 +9,8 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
+    DialogClose
 } from "@/components/ui/dialog"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -16,11 +18,180 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import Avvvatars from "avvvatars-react"
 import useSWR from "swr";
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
+function AddFriendModal() {
+    const accessTokenRef = useRef(null);
+    const [loading, setLoading] = useState(false);
+
+    const usernameFromForm = e => {
+        return new FormData(e.currentTarget).get("username") ?? "FAIL";
+    }
+
+    useEffect(() => {
+        async function init() {
+            const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+            accessTokenRef.current = accessToken;
+        }
+
+        init();
+    }, []);
+
+    const createPendingFriendRequest = async e => {
+        e.preventDefault();
+        setLoading(true);
+
+        const username = usernameFromForm(e);
+
+        const res = await (await fetch(`/api/v1/friends/send?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "POST" })).json();
+        if (!res.success) {
+            window.alert("Failed to create friend request.");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(false);
+        window.alert("Friend request was added successfully if the user exists! Refresh this page or wait a moment for the changes to appear!");
+    };
+
+    const acceptPendingFriendRequest = async e => {
+        e.preventDefault();
+        setLoading(true);
+
+        const username = usernameFromForm(e);
+
+        const res = await ((await fetch(`/api/v1/friends/accept?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "PUT" })).json());
+        if (!res.success) {
+            window.alert("Failed to accept friend request.");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(false);
+        window.alert("Friend request was accepted successfully! Refresh this page or wait a moment for the changes to appear!");
+    };
+
+    const rejectPendingFriendRequest = async e => {
+        e.preventDefault();
+        setLoading(true);
+
+        const username = usernameFromForm(e);
+
+        const res = await ((await fetch(`/api/v1/friends/reject?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "PUT" })).json());
+        if (!res.success) {
+            window.alert("Failed to reject friend request.");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(false);
+        window.alert("Friend request was rejected successfully!");
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline">Add Friend</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+                <form onSubmit={createPendingFriendRequest}>
+                    <DialogHeader>
+                        <DialogTitle>Add Friend</DialogTitle>
+                        <DialogDescription>
+                            Input the username of the friend you'd like to add.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <FieldGroup>
+                        <Field>
+                            <Label htmlFor="add-friend-username">Username</Label>
+                            <Input required id="add-friend-username" name="username" placeholder="@DistinguishedUser" autoComplete="off" />
+                        </Field>
+                    </FieldGroup>
+
+                    <DialogFooter style={{ marginTop: "20px" }}>
+                        <DialogClose asChild>
+                            <Button variant="outline" type="button">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit">Send Invite</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function CreateChatModal() {
+    const accessTokenRef = useRef(null);
+    const [loading, setLoading] = useState(false);
+
+    const usernameFromForm = e => {
+        return new FormData(e.currentTarget).get("username") ?? "FAIL";
+    }
+
+    useEffect(() => {
+        async function init() {
+            const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+            accessTokenRef.current = accessToken;
+        }
+
+        init();
+    }, []);
+
+    const createChat = async e => {
+        e.preventDefault();
+        setLoading(true);
+        const username = usernameFromForm(e);
+
+        const res = await (await fetch(`/api/v1/users/chats/create?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "POST" })).json();
+        if (!res.success) {
+            window.alert("Failed to create chat. Please refresh the page and try again.");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(false);
+        window.alert("Chat created! Refresh the page or wait a moment for the changes to appear.");
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline">Create Chat</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+                <form onSubmit={createChat}>
+                    <DialogHeader>
+                        <DialogTitle>Create Chat</DialogTitle>
+                        <DialogDescription>
+                            Input the username of the friend you'd like to create a chat with.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <FieldGroup>
+                        <Field>
+                            <Label htmlFor="add-friend-username">Username</Label>
+                            <Input required id="add-friend-username" name="username" placeholder="@DistinguishedUser" autoComplete="off" />
+                        </Field>
+                    </FieldGroup>
+
+                    <DialogFooter style={{ marginTop: "20px" }}>
+                        <DialogClose asChild>
+                            <Button variant="outline" type="button">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit">Create Chat</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 function UserAuthModal({ usedForSignup = false }) {
     const [accessToken, setAccessToken] = useState(null);
@@ -230,12 +401,15 @@ function UserAuthModal({ usedForSignup = false }) {
                     </DialogHeader>
                 </DialogContent>
             </Dialog>
-                : (<h2>{usedForSignup ? "" : (loadingChats ? "Loading your messages..." : <div><h2 style={{fontWeight: "bold"}}>Your Chats</h2><ButtonGroup
+                : (<h2>{usedForSignup ? "" : (loadingChats ? "Loading your messages..." : <div><h2 style={{ fontWeight: "bold" }}>Your Chats</h2><ButtonGroup
                     orientation="vertical"
-                    aria-label="Media controls"
                     className="h-fit"
                     key="CurrentChatsButtonGroup"
                 >
+                    <ButtonGroup style={{ marginTop: "20px" }}>
+                        <AddFriendModal />
+                        <CreateChatModal />
+                    </ButtonGroup>
                     {chats.map(chat => {
                         const displayValue = chat.username[0].toUpperCase() + (chat.username[chat.username.length / 2] ?? "").toUpperCase();
                         return <button key={`${displayValue}BtnContainer`} onClick={() => router.push(`/dm/${chat.chatId}`)}><Avvvatars size={96} value={chat.username} displayValue={displayValue} key={displayValue} /></button>
