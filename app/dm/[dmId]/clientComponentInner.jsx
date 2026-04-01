@@ -76,7 +76,7 @@ export default function MessagesListClientComponent({ dmId }) {
         newMessages.sort((a, b) => b.createdAt - a.createdAt);
 
         if (newMessages.length < 10) setHasMoreMessages(false);
-        lastMessageIdRef.current = newMessages.at(-1).messageId;
+        newMessages.at(-1)?.messageId && (lastMessageIdRef.current = newMessages.at(-1).messageId);
 
         setMessages(messages => {
             return [...messages, ...newMessages];
@@ -151,7 +151,6 @@ export default function MessagesListClientComponent({ dmId }) {
                     <LucideSend className="h-5 w-5 md:h-6 md:w-6" />
                 </Button>
             </div>
-
         </div>
     );
 }
