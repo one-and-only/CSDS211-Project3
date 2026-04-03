@@ -4,6 +4,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 
 const notoSans = Noto_Sans({ variable: '--font-sans', subsets: ["latin"] });
 
@@ -41,6 +42,7 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
         </SidebarProvider>
+        <Toaster />
       </body>
     </html >
 

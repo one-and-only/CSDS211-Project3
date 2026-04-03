@@ -39,6 +39,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
 
 function AddFriendModal() {
     const accessTokenRef = useRef(null);
@@ -84,6 +85,7 @@ function AddFriendModal() {
             return;
         }
 
+        toast.success(`Sent friend request to "${username}"`, { position: "top-center" });
         setLoading(false);
         window.location.reload();
     };
@@ -96,6 +98,7 @@ function AddFriendModal() {
             return;
         }
 
+        toast.success(`Accepted friend request of "${username}"`, { position: "top-center" });
         setLoading(false);
     };
 
@@ -105,6 +108,8 @@ function AddFriendModal() {
             window.alert(`Failed to reject friend request.\n\n${res.error}`);
             return;
         }
+
+        toast.success(`Rejected friend request of "${username}"`, { position: "top-center" });
     };
 
     if (loadingPendingFriendRequests) return null;
@@ -204,7 +209,7 @@ function CreateChatModal() {
         }
 
         setLoading(false);
-        window.location.reload();
+        toast.success(`Created chat with "${username}"`, { position: "top-center" });
     };
 
     const friendsListFetcher = async () => {
@@ -229,6 +234,7 @@ function CreateChatModal() {
                 <Button variant="outline">Create Chat</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
+                <p style={{ fontSize: "16px" }}>Friends:</p>
                 <ScrollArea className="max-h-72 min-h-24">
                     <Table>
                         <TableHeader>
