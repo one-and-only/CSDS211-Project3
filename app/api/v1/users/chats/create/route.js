@@ -38,6 +38,13 @@ export async function POST(request, context) {
         }
     });
 
+    if (targetUser === null) {
+        return NextResponse.json({
+            success: false,
+            error: "Target user doesn't exist"
+        });
+    }
+
     await prisma.chats.create({
         data: {
             initiatorUserId: user.userId,
