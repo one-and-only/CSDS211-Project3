@@ -25,6 +25,11 @@ import useSWR from "swr";
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function AddFriendModal() {
     const accessTokenRef = useRef(null);
@@ -412,10 +417,32 @@ function UserAuthModal({ usedForSignup = false }) {
                         <AddFriendModal />
                         <CreateChatModal />
                     </ButtonGroup>
-                    {chats.map(chat => {
-                        const displayValue = chat.username[0].toUpperCase() + (chat.username[chat.username.length / 2] ?? "").toUpperCase();
-                        return <button key={`${displayValue}BtnContainer`} onClick={() => router.push(`/dm/${chat.chatId}`)}><Avvvatars size={96} value={chat.username} displayValue={displayValue} key={displayValue} /></button>
-                    })}</ButtonGroup></div>)}</h2>)
+                    {chats.map((chat) => {
+                        const displayValue =
+                            chat.username[0].toUpperCase() +
+                            (chat.username[parseInt(chat.username.length / 2)] ?? "").toUpperCase();
+
+                        return (
+                            <Tooltip key={`hover-tooltip-${chat.username}`}>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => router.push(`/dm/${chat.chatId}`)}
+                                        className="focus:outline-none" // Optional: clean up focus rings if needed
+                                    >
+                                        <Avvvatars
+                                            size={96}
+                                            value={chat.username}
+                                            displayValue={displayValue}
+                                        />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="right">
+                                    <p>{chat.username}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+                </ButtonGroup></div>)}</h2>)
             }
         </>
     );
