@@ -57,7 +57,7 @@ function AddFriendModal() {
         }
 
         setLoading(false);
-        window.alert("Friend request was added successfully if the user exists! Refresh this page or wait a moment for the changes to appear!");
+        window.location.reload();
     };
 
     const acceptPendingFriendRequest = async e => {
@@ -119,7 +119,8 @@ function AddFriendModal() {
                         <DialogClose asChild>
                             <Button variant="outline" type="button">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit">Send Invite</Button>
+                        {loading && <Loader2 />}
+                        {!loading && <Button type="submit">Send Invite</Button>}
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -157,7 +158,7 @@ function CreateChatModal() {
         }
 
         setLoading(false);
-        window.alert("Chat created! Refresh the page or wait a moment for the changes to appear.");
+        window.location.reload();
     };
 
     return (
@@ -185,7 +186,8 @@ function CreateChatModal() {
                         <DialogClose asChild>
                             <Button variant="outline" type="button">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit">Create Chat</Button>
+                        {loading && <Loader2 />}
+                        {!loading && <Button type="submit">Create Chat</Button>}
                     </DialogFooter>
                 </form>
             </DialogContent>
