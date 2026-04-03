@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 
-export async function PUT(request, context) {
+export async function DELETE(request, context) {
     const searchParams = await request.nextUrl.searchParams;
     const accessToken = searchParams.get("accessToken");
     const initiatorUserName = searchParams.get("rejectedUsername");
