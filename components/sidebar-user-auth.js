@@ -24,7 +24,7 @@ import Avvvatars from "avvvatars-react"
 import useSWR from "swr";
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, XCircleIcon, CheckCircle2 } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -38,11 +38,25 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 function AddFriendModal() {
     const accessTokenRef = useRef(null);
     const [loading, setLoading] = useState(false);
+
+    const friendRequestsFetcher = async () => {
+        const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+        if (accessToken === undefined)
+            throw "Unable to get access token. Are you logged in?";
+
+        const friendRequests = await (await fetch(`/api/v1/friends/pending?accessToken=${encodeURIComponent(accessToken)}`)).json();
+        if (!friendRequests.success) {
+            throw "Failed fetching pending friend requests. Refresh the page and try again."
+        }
+
+        return friendRequests.friends;
+    }
+    const { data: pendingFriendRequests, error: friendRequestsLoadError, isLoading: loadingPendingFriendRequests } = useSWR('/api/v1/friends/pending', friendRequestsFetcher, { refreshInterval: 5000 })
 
     const usernameFromForm = e => {
         return new FormData(e.currentTarget).get("username") ?? "FAIL";
@@ -65,7 +79,7 @@ function AddFriendModal() {
 
         const res = await (await fetch(`/api/v1/friends/send?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "POST" })).json();
         if (!res.success) {
-            window.alert("Failed to create friend request.");
+            window.alert(`Failed to create friend request.\n\n${res.error}`);
             setLoading(false);
             return;
         }
@@ -74,32 +88,21 @@ function AddFriendModal() {
         window.location.reload();
     };
 
-    const acceptPendingFriendRequest = async e => {
-        e.preventDefault();
-        setLoading(true);
-
-        const username = usernameFromForm(e);
-
-        const res = await ((await fetch(`/api/v1/friends/accept?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "PUT" })).json());
+    const acceptPendingFriendRequest = async username => {
+        const res = await ((await fetch(`/api/v1/friends/accept?accessToken=${encodeURIComponent(accessTokenRef.current)}&acceptedUsername=${username}`, { method: "PUT" })).json());
         if (!res.success) {
-            window.alert("Failed to accept friend request.");
+            window.alert(`Failed to accept friend request.\n\n${res.error}`);
             setLoading(false);
             return;
         }
 
         setLoading(false);
-        window.alert("Friend request was accepted successfully! Refresh this page or wait a moment for the changes to appear!");
     };
 
-    const rejectPendingFriendRequest = async e => {
-        e.preventDefault();
-        setLoading(true);
-
-        const username = usernameFromForm(e);
-
-        const res = await ((await fetch(`/api/v1/friends/reject?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "PUT" })).json());
+    const rejectPendingFriendRequest = async username => {
+        const res = await ((await fetch(`/api/v1/friends/reject?accessToken=${encodeURIComponent(accessTokenRef.current)}&rejectedUsername=${username}`, { method: "DELETE" })).json());
         if (!res.success) {
-            window.alert("Failed to reject friend request.");
+            window.alert(`Failed to reject friend request.\n\n${res.error}`);
             setLoading(false);
             return;
         }
@@ -108,74 +111,51 @@ function AddFriendModal() {
         window.alert("Friend request was rejected successfully!");
     };
 
+    if (loadingPendingFriendRequests) return null;
+
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline">Add Friend</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
-                <h3>Pending Friend Requests:</h3>
-                <ScrollArea className="h-72">
+                <p style={{ fontSize: "16px" }}>Pending Friend Requests:</p>
+                <ScrollArea className="max-h-72 min-h-24">
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">Username</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead className="w-[100px]">Name</TableHead>
+                                <TableHead className="text-right"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">bUser</TableCell>
-                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
-                            </TableRow>
+                            {
+                                pendingFriendRequests.map(friendRequest => {
+                                    return (
+                                        <TableRow key={`pending-friend-request-entry-${friendRequest.username}`}>
+                                            <TableCell className="font-medium">{friendRequest.username}</TableCell>
+                                            <TableCell className="font-medium"><ScrollArea className="w-36"><p>{`${friendRequest.firstName} ${friendRequest.lastName}`}</p><ScrollBar orientation="horizontal" /></ScrollArea></TableCell>
+                                            <TableCell className="text-right"><Button style={{ marginRight: "10px" }} onClick={() => acceptPendingFriendRequest(friendRequest.username)} size="icon" color="success"><CheckCircle2 /></Button><Button onClick={() => rejectPendingFriendRequest(friendRequest.username)} size="icon" variant="destructive"><XCircleIcon /></Button></TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            }
                         </TableBody>
                     </Table>
                 </ScrollArea>
 
                 <form onSubmit={createPendingFriendRequest}>
                     <DialogHeader>
-                        <DialogTitle>Add Friend</DialogTitle>
+                        <DialogTitle asChild><p style={{ fontSize: "18px"}}>Add Friend</p></DialogTitle>
                         <DialogDescription>
                             Input the username of the friend you'd like to add.
                         </DialogDescription>
                     </DialogHeader>
-
-                    <FieldGroup>
+                    <FieldGroup style={{ marginTop: "20px" }}>
                         <Field>
-                            <Label htmlFor="add-friend-username">Username</Label>
-                            <Input required id="add-friend-username" name="username" placeholder="@DistinguishedUser" autoComplete="off" />
+                            <Label style={{ fontSize: "16px" }} htmlFor="add-friend-username">Username</Label>
+                            <Input style={{ fontSize: "16px" }} required id="add-friend-username" name="username" placeholder="@DistinguishedUser" autoComplete="off" />
                         </Field>
                     </FieldGroup>
 
@@ -216,7 +196,7 @@ function CreateChatModal() {
 
         const res = await (await fetch(`/api/v1/users/chats/create?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "POST" })).json();
         if (!res.success) {
-            window.alert("Failed to create chat. Please refresh the page and try again.");
+            window.alert(`Failed to create chat.\n\n${res.error}`);
             setLoading(false);
             return;
         }
@@ -275,7 +255,7 @@ function UserAuthModal({ usedForSignup = false }) {
 
         return chats.chats;
     }
-    const { data: chats, error: chatLoadError, isLoading: loadingChats } = useSWR('/api/user', chatsFetcher)
+    const { data: chats, error: chatLoadError, isLoading: loadingChats } = useSWR('/api/user', chatsFetcher, { refreshInterval: 5000 })
 
     const form = useForm({
         defaultValues: {
