@@ -18,6 +18,7 @@ export default function MessagesListClientComponent({ dmId }) {
 
     const accessTokenRef = useRef("");
     const lastMessageIdRef = useRef(-1);
+    const newestMessageIdRef = useRef(-1);
     const currentUserIdRef = useRef(-1);
     const chattingWithUsernameRef = useRef("");
 
@@ -45,6 +46,30 @@ export default function MessagesListClientComponent({ dmId }) {
         init();
     }, [dmId, router]);
 
+useEffect(() => {
+    const interval = setInterval(async () => {
+        if (!accessTokenRef.current || newestMessageIdRef.current === -1) return;
+
+        const messagesFetch = await (await fetch(`/api/v1/users/chats/${dmId}/messages?accessToken=${encodeURIComponent(accessTokenRef.current)}&sinceMessageId=${newestMessageIdRef.current}`)).json();
+
+        if (!messagesFetch?.messages?.length) return;
+
+        const newMessages = messagesFetch.messages.map(message => ({ ...message, createdAt: new Date(message.createdAt) }));
+
+        newMessages.sort((a, b) => b.createdAt - a.createdAt);
+
+        const prevNewestId = newestMessageIdRef.current;
+        newestMessageIdRef.current = newMessages[0].messageId;
+
+        const trulyNewMessages = newMessages.filter(m => m.messageId > prevNewestId);
+        if (!trulyNewMessages.length) return;
+
+        setMessages(messages => [...trulyNewMessages, ...messages]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+}, [dmId]);
+
     const sendMessage = async input => {
         const message = await (await fetch(`/api/v1/users/chats/${dmId}/messages/send?accessToken=${encodeURIComponent(accessTokenRef.current)}`, {
             method: "POST",
@@ -52,6 +77,8 @@ export default function MessagesListClientComponent({ dmId }) {
                 message: input
             })
         })).json();
+
+        if (message.messageId > newestMessageIdRef.current) newestMessageIdRef.current = message.messageId;
 
         setMessages(messages => {
             return [{
@@ -77,6 +104,8 @@ export default function MessagesListClientComponent({ dmId }) {
 
         if (newMessages.length < 10) setHasMoreMessages(false);
         newMessages.at(-1)?.messageId && (lastMessageIdRef.current = newMessages.at(-1).messageId);
+
+        if (newestMessageIdRef.current === -1 && newMessages[0]?.messageId) newestMessageIdRef.current = newMessages[0].messageId;
 
         setMessages(messages => {
             return [...messages, ...newMessages];
