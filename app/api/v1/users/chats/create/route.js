@@ -45,6 +45,30 @@ export async function POST(request, context) {
         });
     }
 
+    const potentialDuplicate = await prisma.chats.findFirst({
+        where: {
+            OR: [
+                {
+                    initiatorUserId: user.userId,
+                    targetUserId: targetUser.userId
+                },
+                {
+                    initiatorUserId: targetUser.userId,
+                    targetUserId: user.userId
+                }
+            ]
+        },
+        select: {
+            chatId: true
+        }
+    });
+    if (potentialDuplicate !== null) {
+        return NextResponse.json({
+            success: false,
+            error: "You are already chatting with this user"
+        });
+    }
+
     await prisma.chats.create({
         data: {
             initiatorUserId: user.userId,
