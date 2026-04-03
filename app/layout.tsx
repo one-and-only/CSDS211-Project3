@@ -3,8 +3,9 @@ import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
-const notoSans = Noto_Sans({ variable: '--font-sans' });
+const notoSans = Noto_Sans({ variable: '--font-sans', subsets: ["latin"] });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,16 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+
     <html lang="en" className={notoSans.variable}>
-      <SidebarProvider>
-        <AppSidebar />
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <SidebarTrigger />
-          {children}
-        </body>
-      </SidebarProvider>
-    </html>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SidebarProvider>
+          <TooltipProvider>
+            <AppSidebar />
+
+            <SidebarTrigger />
+            {children}
+          </TooltipProvider>
+        </SidebarProvider>
+      </body>
+    </html >
+
   );
 }

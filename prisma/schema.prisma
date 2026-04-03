@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model friendRequests {
+  friendRequestId                             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  initiatorUserId                             BigInt                @db.UnsignedBigInt
+  targetUserId                                BigInt                @db.UnsignedBigInt
+  status                                      friendRequests_status @default(pending)
+  users_friendRequests_targetUserIdTousers    users                 @relation("friendRequests_targetUserIdTousers", fields: [targetUserId], references: [userId], onUpdate: Restrict, map: "Friend_Requests_users_user_id_fk")
+  users_friendRequests_initiatorUserIdTousers users                 @relation("friendRequests_initiatorUserIdTousers", fields: [initiatorUserId], references: [userId], onUpdate: Restrict, map: "Friend_Requests_users_user_id_fk_2")
+
+  @@unique([initiatorUserId, targetUserId], map: "Friend_Requests_pk_2")
+  @@index([targetUserId], map: "Friend_Requests_users_user_id_fk")
+}
+
+model users {
+  userId                                               BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  firstName                                            String           @db.VarChar(255)
+  lastName                                             String           @db.VarChar(255)
+  username                                             String           @unique(map: "username") @db.VarChar(255)
+  password                                             String           @db.Char(97)
+  accessToken                                          String?          @db.Char(128)
+  email                                                String           @unique(map: "email") @db.VarChar(255)
+  isBanned                                             Boolean          @default(false)
+  chats_chats_initiatorUserIdTousers                   chats[]          @relation("chats_initiatorUserIdTousers")
+  chats_chats_targetUserIdTousers                      chats[]          @relation("chats_targetUserIdTousers")
+  friendRequests_friendRequests_targetUserIdTousers    friendRequests[] @relation("friendRequests_targetUserIdTousers")
+  friendRequests_friendRequests_initiatorUserIdTousers friendRequests[] @relation("friendRequests_initiatorUserIdTousers")
+  messages                                             messages[]
+}
+
+model chats {
+  chatId                             BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  initiatorUserId                    BigInt?    @db.UnsignedBigInt
+  targetUserId                       BigInt?    @db.UnsignedBigInt
+  users_chats_initiatorUserIdTousers users?     @relation("chats_initiatorUserIdTousers", fields: [initiatorUserId], references: [userId], onDelete: Restrict, onUpdate: Restrict, map: "chats_users__fk")
+  users_chats_targetUserIdTousers    users?     @relation("chats_targetUserIdTousers", fields: [targetUserId], references: [userId], onDelete: Restrict, onUpdate: Restrict, map: "chats_users__fk_2")
+  messages                           messages[]
+
+  @@unique([initiatorUserId, targetUserId], map: "chats_pk_2")
+  @@index([targetUserId], map: "chats_users__fk_2")
+}
+
+model messages {
+  messageId BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  chatId    BigInt   @db.UnsignedBigInt
+  message   String   @db.Text
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  userId    BigInt   @db.UnsignedBigInt
+  chats     chats    @relation(fields: [chatId], references: [chatId], onUpdate: Restrict, map: "messages_chats_chatId_fk")
+  users     users    @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "messages_users_userId_fk")
+
+  @@index([chatId], map: "messages_chats_chatId_fk")
+  @@index([userId], map: "messages_users_userId_fk")
+}
+
+enum friendRequests_status {
+  pending
+  accepted
+}
