@@ -143,7 +143,7 @@ function AddFriendModal() {
 
                 <form onSubmit={createPendingFriendRequest}>
                     <DialogHeader>
-                        <DialogTitle asChild><p style={{ fontSize: "18px"}}>Add Friend</p></DialogTitle>
+                        <DialogTitle asChild><p style={{ fontSize: "18px" }}>Add Friend</p></DialogTitle>
                         <DialogDescription>
                             Input the username of the friend you'd like to add.
                         </DialogDescription>
@@ -185,10 +185,16 @@ function CreateChatModal() {
         init();
     }, []);
 
-    const createChat = async e => {
-        e.preventDefault();
+    const createChat = async (e, internalUsername = undefined) => {
         setLoading(true);
-        const username = usernameFromForm(e);
+
+        let username;
+        if (internalUsername === undefined) {
+            e.preventDefault();
+            username = usernameFromForm(e);
+        } else {
+            username = internalUsername;
+        }
 
         const res = await (await fetch(`/api/v1/users/chats/create?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "POST" })).json();
         if (!res.success) {
@@ -201,12 +207,53 @@ function CreateChatModal() {
         window.location.reload();
     };
 
+    const friendsListFetcher = async () => {
+        const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+        if (accessToken === undefined)
+            throw "Unable to get access token. Are you logged in?";
+
+        const friendRequests = await (await fetch(`/api/v1/friends?accessToken=${encodeURIComponent(accessToken)}`)).json();
+        if (!friendRequests.success) {
+            throw "Failed fetching friends list. Refresh the page and try again."
+        }
+
+        return friendRequests.friends;
+    }
+    const { data: friendsList, error: friendsListLoadError, isLoading: loadingFriendsList } = useSWR('/api/v1/friends', friendsListFetcher, { refreshInterval: 5000 });
+
+    if (loadingFriendsList) return null;
+
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline">Create Chat</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
+                <ScrollArea className="max-h-72 min-h-24">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Username</TableHead>
+                                <TableHead className="w-[100px]">Name</TableHead>
+                                <TableHead className="text-right"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {
+                                friendsList.map(friendRequest => {
+                                    return (
+                                        <TableRow key={`pending-friend-request-entry-${friendRequest.username}`}>
+                                            <TableCell className="font-medium">{friendRequest.username}</TableCell>
+                                            <TableCell className="font-medium"><ScrollArea className="w-36"><p>{`${friendRequest.firstName} ${friendRequest.lastName}`}</p><ScrollBar orientation="horizontal" /></ScrollArea></TableCell>
+                                            <TableCell className="text-right"><Button onClick={() => createChat(undefined, friendRequest.username)} color="primary">Chat</Button></TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            }
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+
                 <form onSubmit={createChat}>
                     <DialogHeader>
                         <DialogTitle>Create Chat</DialogTitle>
