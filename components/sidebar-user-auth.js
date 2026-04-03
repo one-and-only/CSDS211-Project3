@@ -103,12 +103,8 @@ function AddFriendModal() {
         const res = await ((await fetch(`/api/v1/friends/reject?accessToken=${encodeURIComponent(accessTokenRef.current)}&rejectedUsername=${username}`, { method: "DELETE" })).json());
         if (!res.success) {
             window.alert(`Failed to reject friend request.\n\n${res.error}`);
-            setLoading(false);
             return;
         }
-
-        setLoading(false);
-        window.alert("Friend request was rejected successfully!");
     };
 
     if (loadingPendingFriendRequests) return null;
