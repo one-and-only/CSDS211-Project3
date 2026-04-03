@@ -30,6 +30,15 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 function AddFriendModal() {
     const accessTokenRef = useRef(null);
@@ -105,6 +114,56 @@ function AddFriendModal() {
                 <Button variant="outline">Add Friend</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
+                <h3>Pending Friend Requests:</h3>
+                <ScrollArea className="h-72">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Username</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">bUser</TableCell>
+                                <TableCell className="text-right"><Button style={{ marginRight: "10px" }} color="success">Accept</Button><Button variant="destructive">Reject</Button></TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+
                 <form onSubmit={createPendingFriendRequest}>
                     <DialogHeader>
                         <DialogTitle>Add Friend</DialogTitle>
