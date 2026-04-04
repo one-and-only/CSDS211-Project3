@@ -311,6 +311,7 @@ function UserAuthModal({ usedForSignup = false }) {
         }
 
         toast.success(`Deleted chat with "${username}"`, { position: "top-center" });
+        router.replace("/");
     };
 
     const chatsFetcher = async () => {
