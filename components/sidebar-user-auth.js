@@ -292,6 +292,27 @@ function UserAuthModal({ usedForSignup = false }) {
     const [accessToken, setAccessToken] = useState(null);
     const router = useRouter();
 
+    const accessTokenRef = useRef("");
+
+    useEffect(() => {
+        async function init() {
+            const accessToken = (await window.cookieStore.get("accessToken"))?.value;
+            accessTokenRef.current = accessToken;
+        }
+
+        init();
+    }, []);
+
+    const deleteChat = async username => {
+        const res = await ((await fetch(`/api/v1/users/chats/delete?accessToken=${encodeURIComponent(accessTokenRef.current)}&targetUsername=${username}`, { method: "DELETE" })).json());
+        if (!res.success) {
+            window.alert(`Failed to delete chat.\n\n${res.error}`);
+            return;
+        }
+
+        toast.success(`Deleted chat with "${username}"`, { position: "top-center" });
+    };
+
     const chatsFetcher = async () => {
         const accessToken = (await window.cookieStore.get("accessToken"))?.value;
         if (accessToken === undefined)
@@ -511,23 +532,26 @@ function UserAuthModal({ usedForSignup = false }) {
                             (chat.username[parseInt(chat.username.length / 2)] ?? "").toUpperCase();
 
                         return (
-                            <Tooltip key={`hover-tooltip-${chat.username}`}>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={() => router.push(`/dm/${chat.chatId}`)}
-                                        className="focus:outline-none" // Optional: clean up focus rings if needed
-                                    >
-                                        <Avvvatars
-                                            size={96}
-                                            value={chat.username}
-                                            displayValue={displayValue}
-                                        />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="right">
-                                    <p>{chat.username}</p>
-                                </TooltipContent>
-                            </Tooltip>
+                            <ButtonGroup>
+                                <Tooltip key={`hover-tooltip-${chat.username}`}>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={() => router.push(`/dm/${chat.chatId}`)}
+                                            className="focus:outline-none" // Optional: clean up focus rings if needed
+                                        >
+                                            <Avvvatars
+                                                size={96}
+                                                value={chat.username}
+                                                displayValue={displayValue}
+                                            />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right">
+                                        <p>{chat.username}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Button variant="ghost" style={{ borderRadius: "999px" }} size="icon-lg" onClick={() => deleteChat(chat.username)}><XCircleIcon /></Button>
+                            </ButtonGroup>
                         );
                     })}
                 </ButtonGroup></div>)}</h2>)
